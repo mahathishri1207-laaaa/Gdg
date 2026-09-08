@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // All reads/writes to Firestore in this app happen exclusively through
+    // the Next.js server using the firebase-admin SDK, which is not subject
+    // to these rules. There is no legitimate client-side (browser) access
+    // path to Firestore in this project (see lib/auth-client.js and grep
+    // results for "firebase/firestore" — none found).
+    //
+    // The previous rule ("allow read, write: if true") left the entire
+    // database — including the better-auth "user"/"session"/"account"
+    // collections used for authentication — readable and writable by
+    // anyone who called the Firestore REST/SDK API directly with the
+    // public NEXT_PUBLIC_FIREBASE_* project config. That would allow an
+    // attacker to read all applicant data, forge sessions, or grant
+    // themselves the "admin" role without ever touching this app's code.
+    //
+    // Denying all direct client access closes that hole while having zero
+    // effect on the app itself, since it never talks to Firestore from
+    // the client.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
